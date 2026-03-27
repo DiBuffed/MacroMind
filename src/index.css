@@ -1,27 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-mm-bg: #0a0a0f;
-  --color-mm-surface: #12121a;
-  --color-mm-border: #1f1f2e;
-  --color-mm-accent: #00ff88;
-  --color-mm-accent-dim: rgba(0, 255, 136, 0.12);
-  --color-mm-warning: #ff6b35;
-  --color-mm-muted: #6b6b7a;
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-mm-page: #ffffff;
+  --color-mm-alt: #fcfcfc;
+  --color-mm-surface: #ffffff;
+  --color-mm-border: #e8e8ec;
+  --color-mm-text: #1a1a2e;
+  --color-mm-muted: #666677;
+  --color-mm-primary: #4361ee;
+  --color-mm-pink: #f72585;
+  --color-mm-cyan: #4cc9f0;
+  --color-mm-yellow: #ffd166;
+  --color-mm-warning: #e85d04;
+  --color-mm-success: #06d6a0;
+  --shadow-mm-card: 0 20px 40px rgba(0, 0, 0, 0.06);
+  --shadow-mm-card-hover: 0 28px 56px rgba(0, 0, 0, 0.08);
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "IBM Plex Mono", Menlo, monospace;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
   font-family: var(--font-sans);
-  background-color: var(--color-mm-bg);
-  color: #e8e8ed;
+  background-color: var(--color-mm-page);
+  color: var(--color-mm-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -31,6 +41,18 @@ body {
 
 .font-data {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.mm-card {
+  border-radius: 24px;
+  border: 1px solid var(--color-mm-border);
+  background: var(--color-mm-surface);
+  box-shadow: var(--shadow-mm-card);
+}
+
+.mm-pill {
+  border-radius: 9999px;
 }
 
 @keyframes mm-blink {
@@ -47,7 +69,7 @@ body {
 .mm-cursor::after {
   content: "▋";
   margin-left: 2px;
-  color: var(--color-mm-accent);
+  color: var(--color-mm-primary);
   animation: mm-blink 1s step-end infinite;
 }
 
@@ -69,4 +91,16 @@ body {
 .mm-risk-bar-inner {
   animation: mm-risk-grow 1s ease-out forwards;
   width: 0%;
+}
+
+.mm-risk-high {
+  background: linear-gradient(90deg, #f72585, #ff6b6b);
+}
+
+.mm-risk-medium {
+  background: linear-gradient(90deg, #ffd166, #ffb703);
+}
+
+.mm-risk-low {
+  background: linear-gradient(90deg, #4cc9f0, #4361ee);
 }

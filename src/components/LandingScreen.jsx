@@ -1,26 +1,31 @@
 export default function LandingScreen({ onStart }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 sm:py-24">
       <div className="max-w-2xl text-center">
-        <p className="font-data mb-4 text-xs tracking-[0.2em] text-mm-accent/80">
-          MACRO BRIEFING AGENT
-        </p>
-        <h1 className="mb-5 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
-          오늘 시장, 왜 이렇게 움직였는지 아세요?
+        <span className="mm-pill mb-8 inline-block bg-mm-cyan/15 px-5 py-2 text-sm font-bold text-mm-primary">
+          AI 거시경제 에이전트
+        </span>
+        <h1 className="mb-6 text-4xl font-extrabold leading-[1.15] tracking-tight text-mm-text sm:text-5xl md:text-[3.25rem]">
+          오늘 시장,
+          <br />
+          왜 이렇게 움직였을까요?
         </h1>
-        <p className="mb-3 text-lg font-medium leading-snug text-white/95 sm:text-xl">
+        <p className="mb-3 text-lg font-semibold leading-snug text-mm-text sm:text-xl">
           나한테 중요한 뉴스만, 내 종목 기준으로, 역사적 맥락과 함께.
         </p>
-        <p className="mb-10 text-sm text-mm-muted sm:text-base">
+        <p className="mb-12 text-base text-mm-muted sm:text-lg">
           리스크 매트릭스로 거시 노출도를 숫자로, 분산 경고로 쏠림을 한눈에.
         </p>
         <button
           type="button"
           onClick={onStart}
-          className="font-data rounded border border-mm-accent/40 bg-mm-accent-dim px-8 py-3.5 text-sm font-medium text-mm-accent shadow-[0_0_24px_rgba(0,255,136,0.15)] transition hover:border-mm-accent hover:bg-mm-accent/10"
+          className="mm-pill bg-mm-primary px-10 py-4 text-base font-bold text-white shadow-[0_8px_32px_rgba(67,97,238,0.28)] transition hover:scale-[1.02] hover:shadow-[0_12px_40px_rgba(67,97,238,0.35)] active:scale-[0.98]"
         >
-          브리핑 시작하기
+          브리핑 시작하기 →
         </button>
+        <p className="mt-5 text-sm text-mm-muted">
+          포트폴리오 캡쳐 한 장 또는 종목 직접 입력
+        </p>
       </div>
     </div>
   )

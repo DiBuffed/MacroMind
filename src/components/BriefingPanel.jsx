@@ -7,18 +7,18 @@ export default function BriefingPanel({
   portfolioLens,
 }) {
   return (
-    <div className="rounded-lg border border-mm-border bg-mm-surface/40 p-5">
-      <p className="font-data mb-1 text-xs uppercase tracking-wider text-mm-accent">
+    <div className="mm-card p-6 sm:p-8">
+      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-mm-primary">
         오늘의 거시 브리핑
       </p>
       {portfolioLens ? (
-        <h3 className="mb-1 text-lg font-semibold text-white">
+        <h3 className="mb-1 text-xl font-extrabold text-mm-text">
           내 포트폴리오 관점
         </h3>
       ) : (
-        <h3 className="mb-1 text-lg font-semibold text-white">시장 전체 맥락</h3>
+        <h3 className="mb-1 text-xl font-extrabold text-mm-text">시장 전체 맥락</h3>
       )}
-      <p className="mb-4 text-xs text-mm-muted">
+      <p className="mb-6 text-sm text-mm-muted">
         {portfolioLens
           ? '오늘 뉴스를 내 종목·리스크 노출도에 맞춰 요약합니다.'
           : '포트폴리오 없이 일반 거시 흐름을 정리합니다.'}

@@ -1,7 +1,7 @@
 export default function HistoryPlaceholder() {
   return (
-    <section className="mt-8 rounded-lg border border-dashed border-mm-border/80 bg-mm-surface/20 px-5 py-6 text-center">
-      <p className="font-data text-xs uppercase tracking-wider text-mm-muted">
+    <section className="mt-10 rounded-2xl border-2 border-dashed border-mm-border bg-mm-alt/40 px-6 py-8 text-center">
+      <p className="font-data text-xs font-bold uppercase tracking-wider text-mm-muted">
         히스토리
       </p>
       <p className="mt-2 text-sm text-mm-muted">

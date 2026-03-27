@@ -1,6 +1,6 @@
 function dirColor(direction) {
-  if (direction === 'up') return 'text-red-400'
-  if (direction === 'down') return 'text-mm-accent'
+  if (direction === 'up') return 'text-red-500'
+  if (direction === 'down') return 'text-emerald-600'
   return 'text-mm-muted'
 }
 
@@ -13,24 +13,19 @@ export default function MacroIndicatorBar({ indicators }) {
 
   return (
     <div>
-      <p className="font-data mb-3 text-xs uppercase tracking-wider text-mm-muted">
+      <p className="mb-4 text-xs font-bold uppercase tracking-wider text-mm-muted">
         오늘의 거시 지표
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
         {items.map(({ key, title, data }) => (
-          <div
-            key={key}
-            className="rounded-lg border border-mm-border bg-mm-surface/80 px-4 py-3"
-          >
-            <p className="font-data text-xs uppercase tracking-wider text-mm-muted">
+          <div key={key} className="mm-card p-5">
+            <p className="font-data text-[11px] font-semibold uppercase tracking-wider text-mm-muted">
               {title}
             </p>
-            <p className="font-data mt-1 text-2xl font-medium text-white">
+            <p className="font-data mt-2 text-3xl font-bold tracking-tight text-mm-text">
               {data?.value ?? '—'}
             </p>
-            <p
-              className={`font-data mt-1 text-sm ${dirColor(data?.direction)}`}
-            >
+            <p className={`font-data mt-1 text-sm font-medium ${dirColor(data?.direction)}`}>
               {data?.change ?? '—'}
             </p>
           </div>

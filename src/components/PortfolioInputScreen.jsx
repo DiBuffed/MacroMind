@@ -18,52 +18,61 @@ export default function PortfolioInputScreen({ onSubmit, onSkip }) {
   }, [previewUrl])
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
-      <h2 className="mb-2 text-2xl font-semibold text-white">포트폴리오</h2>
-      <p className="mb-8 text-mm-muted">
-        보유 종목을 <strong className="text-white/90">직접 입력</strong>하거나, 원하면
-        증권 앱 캡쳐를 올려도 됩니다. 둘 다 비우면 일반 거시 브리핑만 받습니다.
-      </p>
-
-      <section className="mb-10">
-        <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-accent">
-          1 · 보유 종목 (권장)
-        </h3>
-        <TickerTextInput value={tickers} onChange={setTickers} />
-        <p className="mt-2 text-xs text-mm-muted">
-          쉼표로 구분하세요. 예:{' '}
-          <span className="font-data text-mm-muted/90">
-            삼성전자, SK하이닉스, NAVER
-          </span>
+    <div className="bg-mm-alt/50 flex-1 py-10 sm:py-14">
+      <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6">
+        <p className="font-data mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-mm-primary">
+          Step 2
         </p>
-      </section>
+        <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-mm-text sm:text-3xl">
+          포트폴리오 입력
+        </h2>
+        <p className="mb-10 text-mm-muted">
+          보유 종목을 <strong className="font-semibold text-mm-text">직접 입력</strong>
+          하거나, 증권 앱{' '}
+          <strong className="font-semibold text-mm-text">캡쳐</strong>를 올려 주세요.
+          둘 다 비우면 일반 거시 브리핑만 받습니다.
+        </p>
 
-      <section className="mb-10">
-        <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-muted">
-          2 · 선택 · 증권 앱 캡쳐
-        </h3>
-        <ImageUploadZone
-          previewUrl={previewUrl}
-          onFile={setFile}
-          onClear={() => setFile(null)}
-        />
-      </section>
+        <section className="mm-card mb-8 p-6 sm:p-8">
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-mm-primary">
+            1 · 보유 종목 (권장)
+          </h3>
+          <TickerTextInput value={tickers} onChange={setTickers} />
+          <p className="mt-3 text-xs text-mm-muted">
+            쉼표로 구분 · 예:{' '}
+            <span className="font-data text-mm-text/80">
+              삼성전자, SK하이닉스, NAVER
+            </span>
+          </p>
+        </section>
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-mm-border pt-8">
-        <button
-          type="button"
-          onClick={onSkip}
-          className="font-data text-sm text-mm-muted underline-offset-4 hover:text-white hover:underline"
-        >
-          포트폴리오 없이 시작
-        </button>
-        <button
-          type="button"
-          onClick={() => onSubmit({ tickers, file })}
-          className="font-data rounded border border-mm-accent/50 bg-mm-accent/15 px-8 py-3 text-sm font-medium text-mm-accent transition hover:bg-mm-accent/25"
-        >
-          분석 시작
-        </button>
+        <section className="mm-card mb-10 p-6 sm:p-8">
+          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-mm-muted">
+            2 · 선택 · 증권 앱 캡쳐
+          </h3>
+          <ImageUploadZone
+            previewUrl={previewUrl}
+            onFile={setFile}
+            onClear={() => setFile(null)}
+          />
+        </section>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-mm-border pt-8">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-sm font-medium text-mm-muted underline-offset-4 transition hover:text-mm-primary hover:underline"
+          >
+            포트폴리오 없이 시작
+          </button>
+          <button
+            type="button"
+            onClick={() => onSubmit({ tickers, file })}
+            className="mm-pill bg-mm-primary px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-mm-primary/20 transition hover:scale-[1.02] active:scale-[0.98]"
+          >
+            분석 시작 →
+          </button>
+        </div>
       </div>
     </div>
   )

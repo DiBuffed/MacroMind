@@ -13,14 +13,11 @@ function shorten(text, max = 10) {
 }
 
 function severityStroke(sev) {
-  if (sev === 'high') return 'rgba(255, 107, 53, 0.85)'
-  if (sev === 'medium') return 'rgba(250, 204, 21, 0.75)'
-  return 'rgba(0, 255, 136, 0.55)'
+  if (sev === 'high') return 'rgba(247, 37, 133, 0.88)'
+  if (sev === 'medium') return 'rgba(255, 209, 102, 0.95)'
+  return 'rgba(76, 201, 240, 0.9)'
 }
 
-/**
- * 포트폴리오(중심) ↔ 거시 요인(외곽) ↔ 종목(내곽) 노드 그래프
- */
 export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
   const list = Array.isArray(tickers) ? tickers.filter(Boolean) : []
   const shown = list.slice(0, 6)
@@ -44,7 +41,6 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
       ...row,
       x: cx + rRisk * Math.cos(a),
       y: cy + rRisk * Math.sin(a),
-      a,
     }
   })
 
@@ -58,17 +54,16 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
   })
 
   return (
-    <div className="rounded-lg border border-mm-border bg-mm-bg/40 p-4 sm:p-5">
-      <p className="font-data mb-1 text-xs uppercase tracking-wider text-mm-accent">
+    <div className="mm-card p-5 sm:p-6">
+      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-mm-primary">
         연결도
       </p>
-      <h3 className="mb-1 text-lg font-semibold text-white">
+      <h3 className="mb-1 text-xl font-extrabold text-mm-text">
         포트폴리오 · 거시 요인 네트워크
       </h3>
-      <p className="mb-4 text-xs text-mm-muted">
-        중심은 내 포트폴리오, 바깥 노드는 거시 리스크 축입니다. 선 굵기·색은 노출도(
-        {''}
-        %)와 심각도를 반영합니다.
+      <p className="mb-5 text-sm text-mm-muted">
+        중심은 내 포트폴리오, 바깥 노드는 거시 리스크 축입니다. 선 굵기·색은 노출도(%)와
+        심각도를 반영합니다.
       </p>
 
       <div className="overflow-x-auto">
@@ -79,7 +74,7 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
           aria-label="포트폴리오와 거시 리스크 요인 연결도"
         >
           <defs>
-            <filter id="mm-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <filter id="mm-net-glow" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="1.2" result="b" />
               <feMerge>
                 <feMergeNode in="b" />
@@ -88,7 +83,6 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
             </filter>
           </defs>
 
-          {/* center → risk edges */}
           {riskNodes.map((node) => {
             const w = 1.2 + (Number(node.score) || 0) / 45
             return (
@@ -101,12 +95,11 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
                 stroke={severityStroke(node.severity)}
                 strokeWidth={w}
                 strokeLinecap="round"
-                opacity={0.55 + (Number(node.score) || 0) / 250}
+                opacity={0.45 + (Number(node.score) || 0) / 280}
               />
             )
           })}
 
-          {/* center → ticker edges */}
           {tickerNodes.map((t) => (
             <line
               key={t.name}
@@ -114,13 +107,12 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
               y1={cy}
               x2={t.x}
               y2={t.y}
-              stroke="rgba(107, 107, 122, 0.55)"
+              stroke="rgba(102, 102, 119, 0.35)"
               strokeWidth={1}
               strokeDasharray="4 3"
             />
           ))}
 
-          {/* risk nodes */}
           {riskNodes.map((node) => {
             const r = 10 + (Number(node.score) || 0) / 14
             return (
@@ -129,19 +121,19 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
                   cx={node.x}
                   cy={node.y}
                   r={r}
-                  fill="#12121a"
+                  fill="#ffffff"
                   stroke={severityStroke(node.severity)}
-                  strokeWidth={1.5}
-                  filter="url(#mm-glow)"
+                  strokeWidth={2}
+                  filter="url(#mm-net-glow)"
                 />
                 <text
                   x={node.x}
                   y={node.y - r - 8}
                   textAnchor="middle"
-                  className="fill-mm-muted"
+                  fill="#666677"
                   style={{
                     fontSize: '10px',
-                    fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
+                    fontFamily: 'inherit',
                   }}
                 >
                   {shorten(node.label, 9)}
@@ -150,10 +142,11 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
                   x={node.x}
                   y={node.y + 4}
                   textAnchor="middle"
-                  className="fill-mm-accent"
+                  fill="#4361ee"
                   style={{
                     fontSize: '11px',
-                    fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
+                    fontWeight: 700,
+                    fontFamily: 'ui-monospace, monospace',
                   }}
                 >
                   {Math.min(100, Math.max(0, Number(node.score) || 0))}%
@@ -162,44 +155,42 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
             )
           })}
 
-          {/* ticker nodes */}
           {tickerNodes.map((t) => (
             <g key={t.name}>
               <circle
                 cx={t.x}
                 cy={t.y}
                 r={14}
-                fill="#0a0a0f"
-                stroke="rgba(0, 255, 136, 0.35)"
-                strokeWidth={1}
+                fill="#ffffff"
+                stroke="rgba(76, 201, 240, 0.65)"
+                strokeWidth={1.5}
               />
               <text
                 x={t.x}
                 y={t.y + 4}
                 textAnchor="middle"
-                className="fill-white/90"
-                style={{ fontSize: '9px' }}
+                fill="#1a1a2e"
+                style={{ fontSize: '9px', fontWeight: 600 }}
               >
                 {shorten(t.name, 5)}
               </text>
             </g>
           ))}
 
-          {/* center */}
           <circle
             cx={cx}
             cy={cy}
             r={28}
-            fill="#12121a"
-            stroke="rgba(0, 255, 136, 0.45)"
-            strokeWidth={2}
+            fill="#ffffff"
+            stroke="rgba(67, 97, 238, 0.45)"
+            strokeWidth={2.5}
           />
           <text
             x={cx}
             y={cy - 4}
             textAnchor="middle"
-            className="fill-white"
-            style={{ fontSize: '11px', fontWeight: 600 }}
+            fill="#1a1a2e"
+            style={{ fontSize: '11px', fontWeight: 800 }}
           >
             포트폴리오
           </text>
@@ -207,7 +198,7 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
             x={cx}
             y={cy + 10}
             textAnchor="middle"
-            className="fill-mm-muted"
+            fill="#666677"
             style={{ fontSize: '9px' }}
           >
             중심
@@ -217,7 +208,7 @@ export default function PortfolioRiskNetwork({ riskMatrix, tickers }) {
 
       {extra > 0 && (
         <p className="font-data mt-2 text-center text-[10px] text-mm-muted">
-          종목 {extra}개는 탭 영역에서 확인
+          종목 {extra}개는 아래 탭에서 확인
         </p>
       )}
     </div>

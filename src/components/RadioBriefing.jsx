@@ -1,7 +1,7 @@
 export default function RadioBriefing({ text }) {
   const paragraphs = (text || '').split('\n').filter(Boolean)
   return (
-    <div className="space-y-4 text-[15px] leading-relaxed text-white/90">
+    <div className="space-y-4 text-[15px] leading-relaxed text-mm-text/90">
       {paragraphs.length ? (
         paragraphs.map((p, i) => <p key={i}>{p}</p>)
       ) : (

@@ -13,44 +13,51 @@ export default function LoadingScreen() {
   }, [completed])
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
-      <p className="font-data mb-8 text-xs tracking-[0.25em] text-mm-accent">
-        AGENT RUNNING
+    <div className="bg-mm-alt/40 flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+      <p className="font-data mb-2 text-[11px] font-medium uppercase tracking-[0.25em] text-mm-primary">
+        Step 3 · 에이전트 분석
       </p>
-      <ul className="w-full max-w-lg space-y-4">
+      <h2 className="mb-10 text-center text-xl font-extrabold text-mm-text sm:text-2xl">
+        브리핑을 준비하고 있어요
+      </h2>
+      <ul className="w-full max-w-lg space-y-3">
         {LOADING_STEPS.map((step, i) => {
           const done = completed > i
           const active = completed === i && completed < LOADING_STEPS.length
           return (
             <li
               key={step.text}
-              className={`flex items-center gap-4 rounded-lg border px-4 py-3 transition ${
+              className={`mm-card flex items-center gap-4 px-5 py-4 transition ${
                 done
-                  ? 'border-mm-accent/40 bg-mm-accent-dim'
+                  ? 'border-mm-primary/25 bg-gradient-to-r from-mm-primary/6 to-mm-cyan/5'
                   : active
-                    ? 'border-mm-border bg-mm-surface'
-                    : 'border-mm-border/50 bg-mm-bg/50 opacity-50'
+                    ? 'border-mm-primary/30 shadow-mm-card-hover'
+                    : 'opacity-55'
               }`}
             >
-              <span className="text-xl">{step.icon}</span>
+              <span className="text-2xl">{step.icon}</span>
               <span
-                className={`flex-1 text-sm ${done ? 'text-mm-accent' : 'text-mm-muted'}`}
+                className={`flex-1 text-sm font-medium ${
+                  done ? 'text-mm-text' : 'text-mm-muted'
+                }`}
               >
                 {step.text}
               </span>
               {done && (
-                <span className="font-data text-mm-accent drop-shadow-[0_0_8px_rgba(0,255,136,0.8)]">
+                <span className="font-data text-lg font-bold text-mm-primary">
                   ✓
                 </span>
               )}
               {active && (
-                <span className="font-data text-mm-accent mm-cursor text-sm"> </span>
+                <span className="font-data text-mm-primary mm-cursor text-sm">
+                  {' '}
+                </span>
               )}
             </li>
           )
         })}
       </ul>
-      <p className="font-data mt-10 text-xs text-mm-muted">
+      <p className="font-data mt-12 max-w-md text-center text-xs leading-relaxed text-mm-muted">
         투자 판단은 본인 책임이며, 본 서비스는 정보 정리 목적입니다.
       </p>
     </div>

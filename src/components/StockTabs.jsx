@@ -16,23 +16,21 @@ export default function StockTabs({ tickers, stockDetails }) {
   if (!list.length) return null
 
   return (
-    <section className="mt-8 border-t border-mm-border pt-8">
-      <p className="font-data mb-1 text-xs uppercase tracking-wider text-mm-accent">
+    <section className="mt-10 border-t border-mm-border pt-10">
+      <p className="mb-1 text-xs font-bold uppercase tracking-wider text-mm-primary">
         종목별 딥다이브
       </p>
-      <h3 className="mb-4 text-lg font-semibold text-white">
-        종목별 거시 맥락
-      </h3>
+      <h3 className="mb-6 text-xl font-extrabold text-mm-text">종목별 거시 맥락</h3>
       <div className="flex flex-wrap gap-2">
         {list.map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setPicked(t)}
-            className={`font-data rounded border px-3 py-1.5 text-xs transition ${
+            className={`font-data rounded-full border px-4 py-2 text-xs font-semibold transition ${
               active === t
-                ? 'border-mm-accent bg-mm-accent/15 text-mm-accent'
-                : 'border-mm-border text-mm-muted hover:border-mm-border/80 hover:text-white'
+                ? 'border-mm-primary bg-mm-primary/10 text-mm-primary shadow-sm'
+                : 'border-mm-border bg-white text-mm-muted hover:border-mm-primary/30 hover:text-mm-text'
             }`}
           >
             {t}
@@ -40,9 +38,9 @@ export default function StockTabs({ tickers, stockDetails }) {
         ))}
       </div>
       {active && stockDetails?.[active] && (
-        <p className="mt-4 text-sm leading-relaxed text-white/85">
-          {stockDetails[active]}
-        </p>
+        <div className="mm-card mt-6 p-5">
+          <p className="text-sm leading-relaxed text-mm-text/90">{stockDetails[active]}</p>
+        </div>
       )}
     </section>
   )

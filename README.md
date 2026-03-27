@@ -4,9 +4,21 @@
 
 ## 스택
 
-- React 19 + Vite + Tailwind
+- React 19 + Vite + Tailwind v4
 - Express API (`/api/briefing`, `/api/health`)
 - `@google/generative-ai` — JSON 모드 브리핑
+
+## UI / 디자인
+
+- **앱**과 **`public/landing.html`** 은 동일한 라이트 핀테크 톤(Pretendard, `#4361ee` 액센트, 카드·여백)으로 맞춰 두었습니다.
+- 마케팅용 풀 랜딩: 개발 서버에서 `http://localhost:5173/landing.html`
+
+## 유저 플로우 (앱)
+
+1. **시작** — 랜딩 히어로 → CTA  
+2. **포트폴리오 입력** — 종목 텍스트 또는 캡쳐 (또는 스킵)  
+3. **분석** — 로딩 스텝  
+4. **결과** — 대시보드(지표 → 연결도 → 브리핑 → 리스크 → 분산 → 종목 탭 → 히스토리 예정)
 
 ## 로컬 실행 (프론트 + API 동시에)
 

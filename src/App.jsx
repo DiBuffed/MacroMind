@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { fetchMacroBriefing } from './api/briefingClient.js'
 import { MOCK_BRIEFING_RESPONSE } from './api/briefingMock.js'
 import AppHeader from './components/AppHeader.jsx'
+import FlowStepper from './components/FlowStepper.jsx'
 import LandingScreen from './components/LandingScreen.jsx'
 import PortfolioInputScreen from './components/PortfolioInputScreen.jsx'
 import LoadingScreen from './components/LoadingScreen.jsx'
@@ -9,6 +10,10 @@ import DashboardScreen from './components/DashboardScreen.jsx'
 
 const MIN_LOADING_MS = 9000
 
+/**
+ * Flow: ① 랜딩 → ② 포트폴리오 입력 → ③ 에이전트 분석(로딩) → ④ 대시보드
+ * (종목 탭·히스토리는 ④ 안에서)
+ */
 function readFileAsBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -97,8 +102,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-mm-bg">
-      <AppHeader apiStatus={apiStatus} />
+    <div className="flex min-h-[100dvh] flex-col bg-mm-page">
+      <AppHeader apiStatus={apiStatus} screen={screen} />
+      <FlowStepper screen={screen} />
       <div className="flex flex-1 flex-col">
         {screen === 'landing' && (
           <LandingScreen onStart={() => setScreen('input')} />
