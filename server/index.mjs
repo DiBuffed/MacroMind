@@ -16,6 +16,14 @@ app.get('/api/health', (_req, res) => {
     provider: 'gemini',
     hasKey,
     model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    integrations: {
+      frankfurter: true,
+      google_news_rss: true,
+      newsapi: Boolean((process.env.NEWS_API_KEY || '').trim()),
+      finnhub: Boolean((process.env.FINNHUB_API_KEY || '').trim()),
+      fred: Boolean((process.env.FRED_API_KEY || '').trim()),
+      alphaVantage: Boolean((process.env.ALPHA_VANTAGE_KEY || '').trim()),
+    },
   })
 })
 

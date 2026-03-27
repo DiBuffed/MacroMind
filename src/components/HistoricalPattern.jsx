@@ -27,6 +27,16 @@ export default function HistoricalPattern({ pattern }) {
         <p className="mt-4 text-sm font-semibold text-mm-primary">
           그래서 지금은? {pattern.current_implication}
         </p>
+        {pattern.then_vs_now ? (
+          <div className="mt-4 rounded-xl border border-mm-cyan/20 bg-mm-cyan/[0.05] px-4 py-3">
+            <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-mm-cyan">
+              그때 vs 지금 — 무엇이 다른가?
+            </p>
+            <p className="text-sm leading-relaxed text-mm-text/85">
+              {pattern.then_vs_now}
+            </p>
+          </div>
+        ) : null}
       </div>
     </div>
   )

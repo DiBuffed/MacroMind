@@ -1,10 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
-import ImageUploadZone from './ImageUploadZone.jsx'
-import TickerTextInput from './TickerTextInput.jsx'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-export default function PortfolioInputScreen({ onSubmit, onSkip }) {
-  const [tickers, setTickers] = useState('')
+export default function PortfolioInputScreen({
+  onSubmit,
+  onSkip,
+  initialTickers = '',
+}) {
+  const [tickers, setTickers] = useState(initialTickers)
   const [file, setFile] = useState(null)
+
+  useEffect(() => {
+    setTickers(initialTickers)
+  }, [initialTickers])
 
   const previewUrl = useMemo(
     () => (file ? URL.createObjectURL(file) : null),
@@ -17,58 +23,128 @@ export default function PortfolioInputScreen({ onSubmit, onSkip }) {
     }
   }, [previewUrl])
 
+  const onDrop = useCallback(
+    (e) => {
+      e.preventDefault()
+      const f = e.dataTransfer?.files?.[0]
+      if (f && f.type.startsWith('image/')) setFile(f)
+    },
+    [],
+  )
+
+  const hasAnything = tickers.trim().length > 0 || file
+
   return (
-    <div className="bg-mm-alt/50 flex-1 py-10 sm:py-14">
-      <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6">
-        <p className="font-data mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-mm-primary">
-          Step 2
-        </p>
-        <h2 className="mb-2 text-2xl font-extrabold tracking-tight text-mm-text sm:text-3xl">
-          포트폴리오 입력
-        </h2>
-        <p className="mb-10 text-mm-muted">
-          보유 종목을 <strong className="font-semibold text-mm-text">직접 입력</strong>
-          하거나, 증권 앱{' '}
-          <strong className="font-semibold text-mm-text">캡쳐</strong>를 올려 주세요.
-          둘 다 비우면 일반 거시 브리핑만 받습니다.
-        </p>
-
-        <section className="mm-card mb-8 p-6 sm:p-8">
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-mm-primary">
-            1 · 보유 종목 (권장)
-          </h3>
-          <TickerTextInput value={tickers} onChange={setTickers} />
-          <p className="mt-3 text-xs text-mm-muted">
-            쉼표로 구분 · 예:{' '}
-            <span className="font-data text-mm-text/80">
-              삼성전자, SK하이닉스, NAVER
-            </span>
+    <div className="flex flex-1 items-start justify-center bg-mm-alt/40 py-10 sm:py-16">
+      <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
+        <div className="mb-8 text-center">
+          <span className="mm-pill mb-4 inline-block bg-mm-primary/10 px-4 py-1.5 text-xs font-bold text-mm-primary">
+            30초면 연결 시작
+          </span>
+          <h2 className="text-2xl font-extrabold tracking-tight text-mm-text sm:text-3xl">
+            종목만 알려 주세요
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-mm-muted">
+            입력·캡처 한 번이면 오늘 뉴스·시세와 거시·역사 맥락이{' '}
+            <strong className="font-medium text-mm-text/90">내 종목 렌즈</strong>로 묶입니다.
+            분석 후 바로 대시보드에서 확인하세요.
           </p>
-        </section>
+        </div>
 
-        <section className="mm-card mb-10 p-6 sm:p-8">
-          <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-mm-muted">
-            2 · 선택 · 증권 앱 캡쳐
-          </h3>
-          <ImageUploadZone
-            previewUrl={previewUrl}
-            onFile={setFile}
-            onClear={() => setFile(null)}
-          />
-        </section>
+        <div className="mm-card overflow-hidden">
+          {/* 종목 텍스트 입력 */}
+          <div className="border-b border-mm-border px-5 py-5 sm:px-7 sm:py-6">
+            <label
+              htmlFor="mm-tickers"
+              className="mb-2 block text-xs font-bold uppercase tracking-wider text-mm-primary"
+            >
+              보유 종목
+            </label>
+            <textarea
+              id="mm-tickers"
+              value={tickers}
+              onChange={(e) => setTickers(e.target.value)}
+              rows={3}
+              placeholder="삼성전자, SK하이닉스, 현대차, NAVER, TSMC ..."
+              className="font-data w-full resize-y rounded-xl border border-mm-border bg-mm-page px-4 py-3 text-sm leading-relaxed text-mm-text placeholder:text-mm-muted/50 focus:border-mm-primary focus:outline-none focus:ring-2 focus:ring-mm-primary/20"
+            />
+            <p className="mt-2 text-xs text-mm-muted">
+              쉼표·줄바꿈으로 구분 — 한국/미국/ETF 모두 가능
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-mm-border pt-8">
+          {/* 이미지 업로드 */}
+          <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                document.getElementById('mm-portfolio-file')?.click()
+              }
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={onDrop}
+            onClick={() => document.getElementById('mm-portfolio-file')?.click()}
+            className="relative flex min-h-[120px] cursor-pointer flex-col items-center justify-center px-5 py-5 transition hover:bg-mm-cyan/5 sm:px-7 sm:py-6"
+          >
+            <input
+              id="mm-portfolio-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) setFile(f)
+              }}
+            />
+            {previewUrl ? (
+              <div className="relative w-full text-center">
+                <img
+                  src={previewUrl}
+                  alt="포트폴리오 캡쳐"
+                  className="mx-auto max-h-40 rounded-xl object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setFile(null)
+                  }}
+                  className="font-data mt-3 text-xs font-medium text-mm-pink hover:underline"
+                >
+                  이미지 제거
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5 text-center">
+                <span className="text-2xl opacity-60">📸</span>
+                <p className="text-sm font-medium text-mm-muted">
+                  또는 증권앱 <span className="text-mm-text">캡쳐</span>를 여기에
+                  드롭/클릭
+                </p>
+                <p className="font-data text-[10px] text-mm-muted/60">
+                  JPG · PNG · WebP
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 버튼 */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
           <button
             type="button"
             onClick={onSkip}
             className="text-sm font-medium text-mm-muted underline-offset-4 transition hover:text-mm-primary hover:underline"
           >
-            포트폴리오 없이 시작
+            종목 없이 거시 브리핑만
           </button>
           <button
             type="button"
             onClick={() => onSubmit({ tickers, file })}
-            className="mm-pill bg-mm-primary px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-mm-primary/20 transition hover:scale-[1.02] active:scale-[0.98]"
+            disabled={!hasAnything}
+            className="mm-pill bg-mm-primary px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-mm-primary/20 transition hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
             분석 시작 →
           </button>

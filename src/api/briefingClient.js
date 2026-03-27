@@ -5,6 +5,7 @@
  *   imageMediaType?: string
  *   textTickers?: string
  *   skipPortfolio?: boolean
+ *   briefingIntent?: 'first' | 'daily'
  * }} opts
  */
 export async function fetchMacroBriefing(opts) {

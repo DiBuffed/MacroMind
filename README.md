@@ -17,7 +17,7 @@
 
 1. **시작** — 랜딩 히어로 → CTA  
 2. **포트폴리오 입력** — 종목 텍스트 또는 캡쳐 (또는 스킵)  
-3. **분석** — 로딩 스텝  
+3. **분석** — 브리핑 생성(로딩)  
 4. **결과** — 대시보드(지표 → 연결도 → 브리핑 → 리스크 → 분산 → 종목 탭 → 히스토리 예정)
 
 ## 로컬 실행 (프론트 + API 동시에)
@@ -33,6 +33,19 @@ npm run dev
 - 키를 넣지 않으면 **데모 목 데이터**로만 동작합니다 (헤더에 `Demo`).
 
 `npm run dev`는 `dev:server`와 `dev:client`를 **동시에** 띄웁니다. API만 쓰려면 `npm run dev:server`.
+
+## 외부 뉴스·시세 (선택)
+
+브리핑 생성 시 서버가 **환율(Frankfurter, 키 불필요)** 을 조회하고, 아래 키가 있으면 해당 소스를 추가로 붙여 Gemini 프롬프트에 넣습니다.
+
+| 변수 | 용도 |
+|------|------|
+| `NEWS_API_KEY` | NewsAPI — 한·미 비즈니스 헤드라인 |
+| `FINNHUB_API_KEY` | Finnhub — 글로벌 시장 뉴스 |
+| `FRED_API_KEY` | FRED — 미국 10년 국채 수익률(DGS10) |
+| `ALPHA_VANTAGE_KEY` | Alpha Vantage — WTI 원유(월별 최신값) |
+
+`GET /api/health` 의 `integrations` 필드로 어떤 키가 설정됐는지 확인할 수 있습니다.
 
 ## 배포 시
 

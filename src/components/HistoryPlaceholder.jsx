@@ -5,7 +5,8 @@ export default function HistoryPlaceholder() {
         히스토리
       </p>
       <p className="mt-2 text-sm text-mm-muted">
-        이전 브리핑 저장·날짜별 비교는 곧 제공 예정입니다.
+        날짜별 비교·히스토리 타임라인은 곧 제공 예정입니다. (마지막 브리핑은 이 브라우저에
+        저장됩니다.)
       </p>
     </section>
   )

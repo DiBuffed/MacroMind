@@ -104,3 +104,16 @@ body {
 .mm-risk-low {
   background: linear-gradient(90deg, #4cc9f0, #4361ee);
 }
+
+/* agent pipeline */
+@keyframes mm-pulse-dot {
+  0%, 100% { opacity: .35; }
+  50% { opacity: 1; }
+}
+.mm-pulse { animation: mm-pulse-dot 1.4s ease-in-out infinite; }
+
+@keyframes mm-flow-line {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+.mm-flow-animate { animation: mm-flow-line .8s linear infinite; }

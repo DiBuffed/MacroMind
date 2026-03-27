@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchMacroBriefing } from './api/briefingClient.js'
 import { MOCK_BRIEFING_RESPONSE } from './api/briefingMock.js'
+import {
+  clearPortfolioState,
+  loadPortfolioState,
+  savePortfolioState,
+} from './lib/portfolioStorage.js'
 import AppHeader from './components/AppHeader.jsx'
-import FlowStepper from './components/FlowStepper.jsx'
 import LandingScreen from './components/LandingScreen.jsx'
 import PortfolioInputScreen from './components/PortfolioInputScreen.jsx'
 import LoadingScreen from './components/LoadingScreen.jsx'
@@ -10,10 +14,6 @@ import DashboardScreen from './components/DashboardScreen.jsx'
 
 const MIN_LOADING_MS = 9000
 
-/**
- * Flow: ① 랜딩 → ② 포트폴리오 입력 → ③ 에이전트 분석(로딩) → ④ 대시보드
- * (종목 탭·히스토리는 ④ 안에서)
- */
 function readFileAsBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -31,12 +31,28 @@ function readFileAsBase64(file) {
   })
 }
 
+function tickersToString(arr) {
+  return Array.isArray(arr) ? arr.filter(Boolean).join(', ') : ''
+}
+
 export default function App() {
-  const [screen, setScreen] = useState('landing')
-  const [briefingData, setBriefingData] = useState(null)
+  const [screen, setScreen] = useState(() => {
+    const s = loadPortfolioState()
+    return s?.cachedBriefing ? 'dashboard' : 'landing'
+  })
+  const [briefingData, setBriefingData] = useState(() => {
+    const s = loadPortfolioState()
+    return s?.cachedBriefing ?? null
+  })
   const [usedMock, setUsedMock] = useState(false)
+  const [contextMeta, setContextMeta] = useState(() => {
+    const s = loadPortfolioState()
+    return s?.lastContextMeta ?? null
+  })
   const [errorNote, setErrorNote] = useState(null)
   const [apiStatus, setApiStatus] = useState('checking')
+  const [savedSession, setSavedSession] = useState(() => loadPortfolioState())
+  const [inputInitialTickers, setInputInitialTickers] = useState('')
 
   useEffect(() => {
     fetch('/api/health')
@@ -60,12 +76,36 @@ export default function App() {
     if (!out.ok) {
       setBriefingData({ ...MOCK_BRIEFING_RESPONSE })
       setUsedMock(true)
+      setContextMeta(null)
       setErrorNote(`API 오류 — 데모 데이터를 표시합니다. (${out.error.message})`)
       return
     }
     setBriefingData(out.data)
     setUsedMock(out.usedMock)
+    setContextMeta(out.contextMeta ?? null)
+
+    savePortfolioState({
+      tickers: opts.textTickers ?? '',
+      skipPortfolio: Boolean(opts.skipPortfolio),
+      cachedBriefing: out.data,
+      lastContextMeta: out.contextMeta ?? null,
+    })
+    setSavedSession(loadPortfolioState())
   }, [])
+
+  const handleRefreshFromStorage = useCallback(async () => {
+    const s = loadPortfolioState()
+    if (!s) return
+    setScreen('loading')
+    await runBriefing({
+      imageBase64: null,
+      imageMediaType: 'image/jpeg',
+      textTickers: s.tickers,
+      skipPortfolio: s.skipPortfolio,
+      briefingIntent: 'daily',
+    })
+    setScreen('dashboard')
+  }, [runBriefing])
 
   const handlePortfolioSubmit = async ({ tickers, file }) => {
     setScreen('loading')
@@ -80,6 +120,7 @@ export default function App() {
       imageMediaType,
       textTickers: tickers,
       skipPortfolio: false,
+      briefingIntent: 'first',
     })
     setScreen('dashboard')
   }
@@ -90,27 +131,106 @@ export default function App() {
       imageBase64: null,
       textTickers: '',
       skipPortfolio: true,
+      briefingIntent: 'first',
     })
     setScreen('dashboard')
   }
 
+  const handleContinueDashboard = () => {
+    setScreen('dashboard')
+  }
+
+  const handleStartToInput = () => {
+    const s = loadPortfolioState()
+    setInputInitialTickers(s?.tickers ?? '')
+    setScreen('input')
+  }
+
+  const handleEditHoldings = () => {
+    const currentTickers = tickersToString(briefingData?.portfolio_tickers)
+    const storedTickers = loadPortfolioState()?.tickers ?? ''
+    setInputInitialTickers(currentTickers || storedTickers)
+    setScreen('input')
+  }
+
+  /* ── 종목 추가/삭제 (대시보드 내 실시간 관리) ── */
+  const handleAddTicker = useCallback(
+    (newTicker) => {
+      if (!briefingData) return
+      const existing = Array.isArray(briefingData.portfolio_tickers)
+        ? briefingData.portfolio_tickers
+        : []
+      if (existing.includes(newTicker)) return
+      const updated = [...existing, newTicker]
+      const newData = { ...briefingData, portfolio_tickers: updated }
+      setBriefingData(newData)
+
+      const s = loadPortfolioState()
+      savePortfolioState({
+        tickers: updated.join(', '),
+        skipPortfolio: false,
+        cachedBriefing: newData,
+        lastContextMeta: s?.lastContextMeta ?? null,
+      })
+      setSavedSession(loadPortfolioState())
+    },
+    [briefingData],
+  )
+
+  const handleRemoveTicker = useCallback(
+    (ticker) => {
+      if (!briefingData) return
+      const existing = Array.isArray(briefingData.portfolio_tickers)
+        ? briefingData.portfolio_tickers
+        : []
+      const updated = existing.filter((t) => t !== ticker)
+      const newDetails = { ...(briefingData.stock_details || {}) }
+      delete newDetails[ticker]
+      const newData = {
+        ...briefingData,
+        portfolio_tickers: updated,
+        stock_details: newDetails,
+      }
+      setBriefingData(newData)
+
+      const s = loadPortfolioState()
+      savePortfolioState({
+        tickers: updated.join(', '),
+        skipPortfolio: updated.length === 0,
+        cachedBriefing: newData,
+        lastContextMeta: s?.lastContextMeta ?? null,
+      })
+      setSavedSession(loadPortfolioState())
+    },
+    [briefingData],
+  )
+
   const handleReset = () => {
+    clearPortfolioState()
     setBriefingData(null)
     setUsedMock(false)
+    setContextMeta(null)
     setErrorNote(null)
+    setSavedSession(null)
+    setInputInitialTickers('')
     setScreen('landing')
   }
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-mm-page">
       <AppHeader apiStatus={apiStatus} screen={screen} />
-      <FlowStepper screen={screen} />
       <div className="flex flex-1 flex-col">
         {screen === 'landing' && (
-          <LandingScreen onStart={() => setScreen('input')} />
+          <LandingScreen
+            onStart={handleStartToInput}
+            savedSession={savedSession}
+            onContinueDashboard={handleContinueDashboard}
+            onRefreshToday={handleRefreshFromStorage}
+          />
         )}
         {screen === 'input' && (
           <PortfolioInputScreen
+            initialTickers={inputInitialTickers}
             onSubmit={handlePortfolioSubmit}
             onSkip={handleSkipPortfolio}
           />
@@ -119,6 +239,12 @@ export default function App() {
         {screen === 'dashboard' && briefingData && (
           <DashboardScreen
             data={briefingData}
+            contextMeta={contextMeta}
+            lastBriefingAt={savedSession?.lastBriefingAt}
+            onRefreshToday={handleRefreshFromStorage}
+            onEditHoldings={handleEditHoldings}
+            onAddTicker={handleAddTicker}
+            onRemoveTicker={handleRemoveTicker}
             onReset={handleReset}
             errorNote={
               errorNote ||
