@@ -1,8 +1,6 @@
-import { useCallback, useState } from 'react'
-import {
-  fetchMacroBriefing,
-  MOCK_BRIEFING_RESPONSE,
-} from './api/claudeAgent.js'
+import { useCallback, useEffect, useState } from 'react'
+import { fetchMacroBriefing } from './api/briefingClient.js'
+import { MOCK_BRIEFING_RESPONSE } from './api/briefingMock.js'
 import AppHeader from './components/AppHeader.jsx'
 import LandingScreen from './components/LandingScreen.jsx'
 import PortfolioInputScreen from './components/PortfolioInputScreen.jsx'
@@ -33,6 +31,16 @@ export default function App() {
   const [briefingData, setBriefingData] = useState(null)
   const [usedMock, setUsedMock] = useState(false)
   const [errorNote, setErrorNote] = useState(null)
+  const [apiStatus, setApiStatus] = useState('checking')
+
+  useEffect(() => {
+    fetch('/api/health')
+      .then((r) => r.json())
+      .then((j) => {
+        setApiStatus(j?.hasKey ? 'live' : 'demo')
+      })
+      .catch(() => setApiStatus('demo'))
+  }, [])
 
   const runBriefing = useCallback(async (opts) => {
     setErrorNote(null)
@@ -45,7 +53,7 @@ export default function App() {
       }))
     const [out] = await Promise.all([apiPromise, minWait])
     if (!out.ok) {
-      setBriefingData(MOCK_BRIEFING_RESPONSE)
+      setBriefingData({ ...MOCK_BRIEFING_RESPONSE })
       setUsedMock(true)
       setErrorNote(`API 오류 — 데모 데이터를 표시합니다. (${out.error.message})`)
       return
@@ -90,7 +98,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-mm-bg">
-      <AppHeader />
+      <AppHeader apiStatus={apiStatus} />
       <div className="flex flex-1 flex-col">
         {screen === 'landing' && (
           <LandingScreen onStart={() => setScreen('input')} />
@@ -108,8 +116,8 @@ export default function App() {
             onReset={handleReset}
             errorNote={
               errorNote ||
-              (usedMock && !import.meta.env.VITE_ANTHROPIC_API_KEY
-                ? '데모 모드 — .env에 VITE_ANTHROPIC_API_KEY를 설정하면 실제 브리핑을 호출합니다.'
+              (usedMock && apiStatus === 'demo'
+                ? '데모 모드 — 서버에 GEMINI_API_KEY를 넣으면 실제 브리핑이 생성됩니다. (개발: 프로젝트 루트 .env)'
                 : null)
             }
           />

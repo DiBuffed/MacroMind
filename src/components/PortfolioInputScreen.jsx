@@ -18,32 +18,38 @@ export default function PortfolioInputScreen({ onSubmit, onSkip }) {
   }, [previewUrl])
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
-      <h2 className="mb-2 text-2xl font-semibold text-white">포트폴리오 입력</h2>
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+      <h2 className="mb-2 text-2xl font-semibold text-white">포트폴리오</h2>
       <p className="mb-8 text-mm-muted">
-        이미지 또는 종목명으로 분석할 범위를 알려주세요.
+        보유 종목을 <strong className="text-white/90">직접 입력</strong>하거나, 원하면
+        증권 앱 캡쳐를 올려도 됩니다. 둘 다 비우면 일반 거시 브리핑만 받습니다.
       </p>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-accent">
-            A · 이미지
-          </h3>
-          <ImageUploadZone
-            previewUrl={previewUrl}
-            onFile={setFile}
-            onClear={() => setFile(null)}
-          />
-        </div>
-        <div>
-          <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-accent">
-            B · 텍스트
-          </h3>
-          <TickerTextInput value={tickers} onChange={setTickers} />
-        </div>
-      </div>
+      <section className="mb-10">
+        <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-accent">
+          1 · 보유 종목 (권장)
+        </h3>
+        <TickerTextInput value={tickers} onChange={setTickers} />
+        <p className="mt-2 text-xs text-mm-muted">
+          쉼표로 구분하세요. 예:{' '}
+          <span className="font-data text-mm-muted/90">
+            삼성전자, SK하이닉스, NAVER
+          </span>
+        </p>
+      </section>
 
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-mm-border pt-8">
+      <section className="mb-10">
+        <h3 className="font-data mb-3 text-xs uppercase tracking-wider text-mm-muted">
+          2 · 선택 · 증권 앱 캡쳐
+        </h3>
+        <ImageUploadZone
+          previewUrl={previewUrl}
+          onFile={setFile}
+          onClear={() => setFile(null)}
+        />
+      </section>
+
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-mm-border pt-8">
         <button
           type="button"
           onClick={onSkip}

@@ -1,46 +1,30 @@
 # MacroMind
 
-거시경제 브리핑 에이전트 웹앱. 포트폴리오 캡쳐 또는 종목 입력을 바탕으로, AI가 오늘의 거시 뉴스·리스크·역사적 패턴을 정리한 한 페이지 대시보드를 보여 줍니다.
+거시경제 브리핑 웹앱. **API 키는 서버에서만 관리**하고, 브리핑 생성은 **Google Gemini**(AI Studio 무료 할당량 활용 가능)로 수행합니다.
 
 ## 스택
 
-- React 19 + [Vite](https://vite.dev/)
-- Tailwind CSS v4 (`@tailwindcss/vite`)
-- Anthropic Messages API (Claude) — 프론트엔드에서 직접 호출
+- React 19 + Vite + Tailwind
+- Express API (`/api/briefing`, `/api/health`)
+- `@google/generative-ai` — JSON 모드 브리핑
 
-## 로컬 실행
+## 로컬 실행 (프론트 + API 동시에)
 
 ```bash
 npm install
 cp .env.example .env
-# .env에 VITE_ANTHROPIC_API_KEY=your_key
+# .env에 GEMINI_API_KEY= 발급한 키 붙여넣기 (https://aistudio.google.com/apikey)
 npm run dev
 ```
 
-API 키가 없으면 **데모용 목 데이터**로 동작합니다 (해커톤·UI 확인용).
+- 프론트: Vite (보통 `http://localhost:5173`) — API는 프록시로 `localhost:8787`에 연결됩니다.
+- 키를 넣지 않으면 **데모 목 데이터**로만 동작합니다 (헤더에 `Demo`).
 
-## 빌드
+`npm run dev`는 `dev:server`와 `dev:client`를 **동시에** 띄웁니다. API만 쓰려면 `npm run dev:server`.
 
-```bash
-npm run build
-npm run preview
-```
+## 배포 시
 
-## GitHub에 올리기
-
-1. [GitHub](https://github.com/new)에서 새 저장소 생성
-2. 이 폴더에서:
-
-```bash
-git commit -m "Initial MacroMind scaffold: Vite, Tailwind, briefing flow"
-git branch -M main
-git remote add origin https://github.com/<your-username>/<repo>.git
-git push -u origin main
-```
-
-## 보안 참고
-
-`VITE_*` 변수는 **클라이언트에 노출**됩니다. 프로덕션에서는 백엔드 프록시나 서버리스로 키를 숨기는 구성을 권장합니다.
+- 빌드 결과(`dist`)와 `server/`를 함께 올리고, 프로덕션에서 `GEMINI_API_KEY`·`PORT`를 환경 변수로 넣으면 됩니다. (프론트만 CDN에 올릴 경우에는 API URL을 따로 맞춰야 합니다.)
 
 ## 라이선스
 
