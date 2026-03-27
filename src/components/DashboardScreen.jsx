@@ -1,4 +1,6 @@
 import MacroIndicatorBar from './MacroIndicatorBar.jsx'
+import PortfolioRiskNetwork from './PortfolioRiskNetwork.jsx'
+import AgentRealityNote from './AgentRealityNote.jsx'
 import RiskMatrix from './RiskMatrix.jsx'
 import BriefingPanel from './BriefingPanel.jsx'
 import DiversificationWarning from './DiversificationWarning.jsx'
@@ -29,6 +31,14 @@ export default function DashboardScreen({ data, onReset, errorNote }) {
 
       <section className="mb-10">
         <MacroIndicatorBar indicators={data?.indicators} />
+      </section>
+
+      <section className="mb-10">
+        <PortfolioRiskNetwork
+          riskMatrix={data?.risk_matrix}
+          tickers={data?.portfolio_tickers}
+        />
+        <AgentRealityNote />
       </section>
 
       <section className="mb-10">
