@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react'
-
 function severityColor(severity) {
   if (severity === 'high') return 'bg-mm-warning'
   if (severity === 'medium') return 'bg-yellow-400'
@@ -7,13 +5,7 @@ function severityColor(severity) {
 }
 
 export default function RiskBar({ label, score, severity }) {
-  const [width, setWidth] = useState(0)
   const safe = Math.min(100, Math.max(0, Number(score) || 0))
-
-  useEffect(() => {
-    const t = requestAnimationFrame(() => setWidth(safe))
-    return () => cancelAnimationFrame(t)
-  }, [safe])
 
   return (
     <div>
@@ -23,8 +15,9 @@ export default function RiskBar({ label, score, severity }) {
       </div>
       <div className="h-2 overflow-hidden rounded bg-mm-border">
         <div
-          className={`h-full rounded transition-all duration-1000 ease-out ${severityColor(severity)}`}
-          style={{ width: `${width}%` }}
+          key={safe}
+          className={`mm-risk-bar-inner h-full rounded ${severityColor(severity)}`}
+          style={{ '--mm-risk-pct': `${safe}%` }}
         />
       </div>
     </div>

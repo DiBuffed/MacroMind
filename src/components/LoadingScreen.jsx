@@ -13,7 +13,7 @@ export default function LoadingScreen() {
   }, [completed])
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
       <p className="font-data mb-8 text-xs tracking-[0.25em] text-mm-accent">
         AGENT RUNNING
       </p>

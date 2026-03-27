@@ -18,7 +18,7 @@ export default function PortfolioInputScreen({ onSubmit, onSkip }) {
   }, [previewUrl])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
       <h2 className="mb-2 text-2xl font-semibold text-white">포트폴리오 입력</h2>
       <p className="mb-8 text-mm-muted">
         이미지 또는 종목명으로 분석할 범위를 알려주세요.

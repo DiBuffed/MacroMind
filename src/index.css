@@ -50,3 +50,23 @@ body {
   color: var(--color-mm-accent);
   animation: mm-blink 1s step-end infinite;
 }
+
+@property --mm-risk-pct {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+@keyframes mm-risk-grow {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--mm-risk-pct);
+  }
+}
+
+.mm-risk-bar-inner {
+  animation: mm-risk-grow 1s ease-out forwards;
+  width: 0%;
+}

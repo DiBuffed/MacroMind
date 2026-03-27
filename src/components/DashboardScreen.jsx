@@ -5,7 +5,7 @@ import StockTabs from './StockTabs.jsx'
 
 export default function DashboardScreen({ data, onReset, errorNote }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-white">브리핑 대시보드</h2>
@@ -24,7 +24,7 @@ export default function DashboardScreen({ data, onReset, errorNote }) {
 
       <MacroIndicatorBar indicators={data?.indicators} />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="mt-6 grid flex-1 gap-6 lg:mt-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <RiskMatrix
           riskMatrix={data?.risk_matrix}
           diversificationWarning={data?.diversification_warning}

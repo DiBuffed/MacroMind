@@ -3,6 +3,7 @@ import {
   fetchMacroBriefing,
   MOCK_BRIEFING_RESPONSE,
 } from './api/claudeAgent.js'
+import AppHeader from './components/AppHeader.jsx'
 import LandingScreen from './components/LandingScreen.jsx'
 import PortfolioInputScreen from './components/PortfolioInputScreen.jsx'
 import LoadingScreen from './components/LoadingScreen.jsx'
@@ -88,29 +89,32 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-mm-bg">
-      {screen === 'landing' && (
-        <LandingScreen onStart={() => setScreen('input')} />
-      )}
-      {screen === 'input' && (
-        <PortfolioInputScreen
-          onSubmit={handlePortfolioSubmit}
-          onSkip={handleSkipPortfolio}
-        />
-      )}
-      {screen === 'loading' && <LoadingScreen />}
-      {screen === 'dashboard' && briefingData && (
-        <DashboardScreen
-          data={briefingData}
-          onReset={handleReset}
-          errorNote={
-            errorNote ||
-            (usedMock && !import.meta.env.VITE_ANTHROPIC_API_KEY
-              ? '데모 모드 — .env에 VITE_ANTHROPIC_API_KEY를 설정하면 실제 브리핑을 호출합니다.'
-              : null)
-          }
-        />
-      )}
+    <div className="flex min-h-[100dvh] flex-col bg-mm-bg">
+      <AppHeader />
+      <div className="flex flex-1 flex-col">
+        {screen === 'landing' && (
+          <LandingScreen onStart={() => setScreen('input')} />
+        )}
+        {screen === 'input' && (
+          <PortfolioInputScreen
+            onSubmit={handlePortfolioSubmit}
+            onSkip={handleSkipPortfolio}
+          />
+        )}
+        {screen === 'loading' && <LoadingScreen />}
+        {screen === 'dashboard' && briefingData && (
+          <DashboardScreen
+            data={briefingData}
+            onReset={handleReset}
+            errorNote={
+              errorNote ||
+              (usedMock && !import.meta.env.VITE_ANTHROPIC_API_KEY
+                ? '데모 모드 — .env에 VITE_ANTHROPIC_API_KEY를 설정하면 실제 브리핑을 호출합니다.'
+                : null)
+            }
+          />
+        )}
+      </div>
     </div>
   )
 }

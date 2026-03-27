@@ -1,6 +1,6 @@
 export default function LandingScreen({ onStart }) {
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center px-6">
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
       <div className="max-w-2xl text-center">
         <p className="font-data mb-4 text-xs tracking-[0.2em] text-mm-accent/80">
           MACRO BRIEFING AGENT
