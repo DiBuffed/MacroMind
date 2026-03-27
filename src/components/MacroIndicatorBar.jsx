@@ -12,25 +12,30 @@ export default function MacroIndicatorBar({ indicators }) {
   ]
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      {items.map(({ key, title, data }) => (
-        <div
-          key={key}
-          className="rounded-lg border border-mm-border bg-mm-surface/80 px-4 py-3"
-        >
-          <p className="font-data text-xs uppercase tracking-wider text-mm-muted">
-            {title}
-          </p>
-          <p className="font-data mt-1 text-2xl font-medium text-white">
-            {data?.value ?? '—'}
-          </p>
-          <p
-            className={`font-data mt-1 text-sm ${dirColor(data?.direction)}`}
+    <div>
+      <p className="font-data mb-3 text-xs uppercase tracking-wider text-mm-muted">
+        오늘의 거시 지표
+      </p>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {items.map(({ key, title, data }) => (
+          <div
+            key={key}
+            className="rounded-lg border border-mm-border bg-mm-surface/80 px-4 py-3"
           >
-            {data?.change ?? '—'}
-          </p>
-        </div>
-      ))}
+            <p className="font-data text-xs uppercase tracking-wider text-mm-muted">
+              {title}
+            </p>
+            <p className="font-data mt-1 text-2xl font-medium text-white">
+              {data?.value ?? '—'}
+            </p>
+            <p
+              className={`font-data mt-1 text-sm ${dirColor(data?.direction)}`}
+            >
+              {data?.change ?? '—'}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

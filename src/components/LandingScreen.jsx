@@ -8,8 +8,11 @@ export default function LandingScreen({ onStart }) {
         <h1 className="mb-5 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
           오늘 시장, 왜 이렇게 움직였는지 아세요?
         </h1>
-        <p className="mb-10 text-lg text-mm-muted">
-          내 포트폴리오 기준 거시경제 브리핑 — 매일 아침
+        <p className="mb-3 text-lg font-medium leading-snug text-white/95 sm:text-xl">
+          나한테 중요한 뉴스만, 내 종목 기준으로, 역사적 맥락과 함께.
+        </p>
+        <p className="mb-10 text-sm text-mm-muted sm:text-base">
+          리스크 매트릭스로 거시 노출도를 숫자로, 분산 경고로 쏠림을 한눈에.
         </p>
         <button
           type="button"

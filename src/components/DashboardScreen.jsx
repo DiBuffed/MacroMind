@@ -1,9 +1,14 @@
 import MacroIndicatorBar from './MacroIndicatorBar.jsx'
 import RiskMatrix from './RiskMatrix.jsx'
 import BriefingPanel from './BriefingPanel.jsx'
+import DiversificationWarning from './DiversificationWarning.jsx'
 import StockTabs from './StockTabs.jsx'
+import HistoryPlaceholder from './HistoryPlaceholder.jsx'
 
 export default function DashboardScreen({ data, onReset, errorNote }) {
+  const hasPortfolio =
+    Array.isArray(data?.portfolio_tickers) && data.portfolio_tickers.length > 0
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -22,23 +27,34 @@ export default function DashboardScreen({ data, onReset, errorNote }) {
         </button>
       </div>
 
-      <MacroIndicatorBar indicators={data?.indicators} />
+      <section className="mb-10">
+        <MacroIndicatorBar indicators={data?.indicators} />
+      </section>
 
-      <div className="mt-6 grid flex-1 gap-6 lg:mt-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <RiskMatrix
-          riskMatrix={data?.risk_matrix}
-          diversificationWarning={data?.diversification_warning}
-        />
+      <section className="mb-10">
         <BriefingPanel
           briefing={data?.briefing}
           historicalPattern={data?.historical_pattern}
+          portfolioLens={hasPortfolio}
         />
-      </div>
+      </section>
+
+      <section className="mb-10">
+        <RiskMatrix riskMatrix={data?.risk_matrix} />
+      </section>
+
+      {data?.diversification_warning?.has_warning ? (
+        <section className="mb-10">
+          <DiversificationWarning warning={data.diversification_warning} />
+        </section>
+      ) : null}
 
       <StockTabs
         tickers={data?.portfolio_tickers}
         stockDetails={data?.stock_details}
       />
+
+      <HistoryPlaceholder />
     </div>
   )
 }

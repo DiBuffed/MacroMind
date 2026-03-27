@@ -1,5 +1,5 @@
 export const LOADING_STEPS = [
-  { icon: '🔍', text: '오늘의 주요 뉴스 수집 중...' },
+  { icon: '🔍', text: '오늘 뉴스 수집 중...' },
   { icon: '📸', text: '포트폴리오 종목 인식 중...' },
   { icon: '🧮', text: '거시 노출도 계산 중...' },
   { icon: '⚠️', text: '분산도 분석 중...' },
