@@ -41,6 +41,9 @@ export function normalizeBriefingData(raw) {
     portfolio_tickers: Array.isArray(raw.portfolio_tickers)
       ? raw.portfolio_tickers
       : b.portfolio_tickers,
+    portfolio_links: Array.isArray(raw.portfolio_links)
+      ? raw.portfolio_links
+      : b.portfolio_links || [],
     risk_matrix: {
       currency: mergeIndicator(rm.currency, incomingRm.currency),
       interest_rate: mergeIndicator(rm.interest_rate, incomingRm.interest_rate),
@@ -84,6 +87,10 @@ export function normalizeBriefingData(raw) {
     news_feed: Array.isArray(raw.news_feed)
       ? raw.news_feed.map((item) => ({
           headline: typeof item?.headline === 'string' ? item.headline : '',
+          region: ['domestic', 'international'].includes(item?.region)
+            ? item.region
+            : 'international',
+          sector: typeof item?.sector === 'string' ? item.sector : '기타',
           summary: typeof item?.summary === 'string' ? item.summary : '',
           ripple_effect:
             typeof item?.ripple_effect === 'string' ? item.ripple_effect : '',

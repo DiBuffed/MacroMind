@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchMacroBriefing } from './api/briefingClient.js'
+import { fetchMacroBriefingStream } from './api/briefingStreamClient.js'
 import { MOCK_BRIEFING_RESPONSE } from './api/briefingMock.js'
 import {
   clearPortfolioState,
@@ -7,7 +8,6 @@ import {
   savePortfolioState,
 } from './lib/portfolioStorage.js'
 import AppHeader from './components/AppHeader.jsx'
-import LandingScreen from './components/LandingScreen.jsx'
 import PortfolioInputScreen from './components/PortfolioInputScreen.jsx'
 import LoadingScreen from './components/LoadingScreen.jsx'
 import DashboardScreen from './components/DashboardScreen.jsx'
@@ -36,23 +36,34 @@ function tickersToString(arr) {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState(() => {
-    const s = loadPortfolioState()
-    return s?.cachedBriefing ? 'dashboard' : 'landing'
-  })
-  const [briefingData, setBriefingData] = useState(() => {
-    const s = loadPortfolioState()
-    return s?.cachedBriefing ?? null
-  })
+  const initialSaved = loadPortfolioState()
+  const initialHistory = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('mm_briefing_history') || '[]')
+    } catch {
+      return []
+    }
+  })()
+
+  const [screen, setScreen] = useState(
+    initialSaved?.cachedBriefing ? 'dashboard' : 'input',
+  )
+  const [agentProgress, setAgentProgress] = useState(null)
+
+  const [briefingData, setBriefingData] = useState(
+    initialSaved?.cachedBriefing ?? null,
+  )
   const [usedMock, setUsedMock] = useState(false)
-  const [contextMeta, setContextMeta] = useState(() => {
-    const s = loadPortfolioState()
-    return s?.lastContextMeta ?? null
-  })
+  const [contextMeta, setContextMeta] = useState(
+    initialSaved?.lastContextMeta ?? null,
+  )
   const [errorNote, setErrorNote] = useState(null)
   const [apiStatus, setApiStatus] = useState('checking')
-  const [savedSession, setSavedSession] = useState(() => loadPortfolioState())
-  const [inputInitialTickers, setInputInitialTickers] = useState('')
+  const [savedSession, setSavedSession] = useState(initialSaved)
+  const [inputInitialTickers, setInputInitialTickers] = useState(
+    initialSaved?.tickers || '',
+  )
+  const [history, setHistory] = useState(initialHistory)
 
   useEffect(() => {
     fetch('/api/health')
@@ -65,19 +76,151 @@ export default function App() {
 
   const runBriefing = useCallback(async (opts) => {
     setErrorNote(null)
-    const minWait = new Promise((r) => setTimeout(r, MIN_LOADING_MS))
-    const apiPromise = fetchMacroBriefing(opts)
-      .then((r) => ({ ok: true, ...r }))
-      .catch((e) => ({
+    setAgentProgress({
+      startedAt: Date.now(),
+      completed: 0,
+      currentStep: 'collect',
+      tools: [],
+      logs: [],
+    })
+
+    const STEP_INDEX = {
+      collect: 0,
+      recognize: 1,
+      pattern: 2,
+      briefing: 3,
+    }
+
+    const STEP_LABEL = {
+      collect: '외부 데이터 수집',
+      recognize: '입력 이해/정리',
+      pattern: '역사·패턴 매칭',
+      briefing: '브리핑 구성',
+    }
+
+    const tryStream = async () => {
+      const out = await fetchMacroBriefingStream(opts, ({ event, data }) => {
+        if (event === 'step') {
+          if (data?.key === 'risk') {
+            if (data?.status === 'start') {
+              setAgentProgress((prev) => ({
+                ...(prev ?? {}),
+                currentStep: 'pattern',
+              }))
+            }
+            return
+          }
+          if (data?.status === 'start') {
+            setAgentProgress((prev) => ({
+              ...(prev ?? {}),
+              currentStep: data.key,
+              logs: [
+                ...(prev?.logs ?? []),
+                {
+                  ts: Date.now(),
+                  level: 'info',
+                  message: `단계 시작: ${STEP_LABEL[data.key] || data.key}`,
+                },
+              ].slice(-80),
+            }))
+          }
+          if (data?.status === 'end') {
+            const idx = STEP_INDEX[data.key]
+            if (typeof idx === 'number') {
+              setAgentProgress((prev) => ({
+                ...(prev ?? {}),
+                completed: Math.max(prev?.completed ?? 0, idx + 1),
+                currentStep: data.key,
+                logs: [
+                  ...(prev?.logs ?? []),
+                  {
+                    ts: Date.now(),
+                    level: 'ok',
+                    message: `단계 완료: ${STEP_LABEL[data.key] || data.key} (${data.ms ?? ''}ms)`,
+                  },
+                ].slice(-80),
+              }))
+            }
+          }
+          if (data?.status === 'fail') {
+            setAgentProgress((prev) => ({
+              ...(prev ?? {}),
+              currentStep: data.key,
+              logs: [
+                ...(prev?.logs ?? []),
+                {
+                  ts: Date.now(),
+                  level: 'fail',
+                  message: `단계 실패: ${STEP_LABEL[data.key] || data.key}`,
+                },
+              ].slice(-80),
+            }))
+          }
+        }
+        if (event === 'tool') {
+          if (data?.name === 'gemini_generate' || data?.name === 'rate_limit_backoff') {
+            return
+          }
+          setAgentProgress((prev) => ({
+            ...(prev ?? {}),
+            completed: prev?.completed ?? 0,
+            tools: [...(prev?.tools ?? []), data].slice(-30),
+            logs: [
+              ...(prev?.logs ?? []),
+              {
+                ts: Date.now(),
+                level: data?.status === 'fail' ? 'fail' : 'info',
+                message: `도구: ${data?.name}${data?.status ? ` (${data.status})` : ''}`,
+              },
+            ].slice(-80),
+          }))
+        }
+        if (event === 'log') {
+          if (data?.step === 'risk') return
+          setAgentProgress((prev) => ({
+            ...(prev ?? {}),
+            logs: [
+              ...(prev?.logs ?? []),
+              {
+                ts: Date.now(),
+                level: 'info',
+                message: data?.message || String(data),
+              },
+            ].slice(-80),
+          }))
+        }
+      })
+      return { ok: true, data: out.data, usedMock: out.usedMock, contextMeta: out.contextMeta }
+    }
+
+    const minWait = new Promise((r) => setTimeout(r, 1200))
+
+    const apiPromise = tryStream().catch(async () => {
+      const r = await fetchMacroBriefing(opts)
+      return { ok: true, ...r }
+    })
+
+    let out
+    try {
+      ;[out] = await Promise.all([apiPromise, minWait])
+    } catch (e) {
+      out = {
         ok: false,
-        error: e instanceof Error ? e : new Error(String(e)),
-      }))
-    const [out] = await Promise.all([apiPromise, minWait])
+        error: {
+          message: e instanceof Error ? e.message : String(e),
+        },
+      }
+    }
     if (!out.ok) {
-      setBriefingData({ ...MOCK_BRIEFING_RESPONSE })
+      const fallbackData = { 
+        ...MOCK_BRIEFING_RESPONSE,
+        portfolio_tickers: opts.textTickers ? opts.textTickers.split(/[\s,]+/).filter(Boolean).slice(0, 10) : MOCK_BRIEFING_RESPONSE.portfolio_tickers
+      }
+      setBriefingData(fallbackData)
       setUsedMock(true)
       setContextMeta(null)
-      setErrorNote(`API 오류 — 데모 데이터를 표시합니다. (${out.error.message})`)
+      setErrorNote(`분석 중 오류가 발생했습니다: ${out.error?.message || 'unknown'}. 임시 데이터를 표시합니다.`)
+      setAgentProgress(null)
       return
     }
     setBriefingData(out.data)
@@ -90,22 +233,35 @@ export default function App() {
       cachedBriefing: out.data,
       lastContextMeta: out.contextMeta ?? null,
     })
+
+    const newEntry = {
+      date: new Date().toISOString(),
+      data: out.data,
+      contextMeta: out.contextMeta ?? null,
+    }
+    const updatedHistory = [newEntry, ...history].slice(0, 10)
+    try {
+      localStorage.setItem('mm_briefing_history', JSON.stringify(updatedHistory))
+    } catch {
+      /* ignore */
+    }
+    setHistory(updatedHistory)
     setSavedSession(loadPortfolioState())
-  }, [])
+    setAgentProgress(null)
+  }, [history])
 
   const handleRefreshFromStorage = useCallback(async () => {
-    const s = loadPortfolioState()
-    if (!s) return
+    if (!savedSession) return
     setScreen('loading')
     await runBriefing({
       imageBase64: null,
       imageMediaType: 'image/jpeg',
-      textTickers: s.tickers,
-      skipPortfolio: s.skipPortfolio,
+      textTickers: savedSession.tickers,
+      skipPortfolio: savedSession.tickers === '',
       briefingIntent: 'daily',
     })
     setScreen('dashboard')
-  }, [runBriefing])
+  }, [runBriefing, savedSession])
 
   const handlePortfolioSubmit = async ({ tickers, file }) => {
     setScreen('loading')
@@ -140,22 +296,15 @@ export default function App() {
     setScreen('dashboard')
   }
 
-  const handleStartToInput = () => {
-    const s = loadPortfolioState()
-    setInputInitialTickers(s?.tickers ?? '')
-    setScreen('input')
-  }
-
   const handleEditHoldings = () => {
     const currentTickers = tickersToString(briefingData?.portfolio_tickers)
-    const storedTickers = loadPortfolioState()?.tickers ?? ''
-    setInputInitialTickers(currentTickers || storedTickers)
+    setInputInitialTickers(currentTickers || savedSession?.tickers || inputInitialTickers || '')
     setScreen('input')
   }
 
   /* ── 종목 추가/삭제 (대시보드 내 실시간 관리) ── */
   const handleAddTicker = useCallback(
-    (newTicker) => {
+    async (newTicker) => {
       if (!briefingData) return
       const existing = Array.isArray(briefingData.portfolio_tickers)
         ? briefingData.portfolio_tickers
@@ -178,7 +327,7 @@ export default function App() {
   )
 
   const handleRemoveTicker = useCallback(
-    (ticker) => {
+    async (ticker) => {
       if (!briefingData) return
       const existing = Array.isArray(briefingData.portfolio_tickers)
         ? briefingData.portfolio_tickers
@@ -207,40 +356,49 @@ export default function App() {
 
   const handleReset = () => {
     clearPortfolioState()
+    try {
+      localStorage.removeItem('mm_briefing_history')
+    } catch {
+      /* ignore */
+    }
     setBriefingData(null)
     setUsedMock(false)
     setContextMeta(null)
     setErrorNote(null)
     setSavedSession(null)
+    setHistory([])
     setInputInitialTickers('')
-    setScreen('landing')
+    setScreen('input')
   }
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-mm-page">
       <AppHeader apiStatus={apiStatus} screen={screen} />
       <div className="flex flex-1 flex-col">
-        {screen === 'landing' && (
-          <LandingScreen
-            onStart={handleStartToInput}
-            savedSession={savedSession}
-            onContinueDashboard={handleContinueDashboard}
-            onRefreshToday={handleRefreshFromStorage}
-          />
-        )}
         {screen === 'input' && (
           <PortfolioInputScreen
             initialTickers={inputInitialTickers}
             onSubmit={handlePortfolioSubmit}
             onSkip={handleSkipPortfolio}
+            onCancel={handleContinueDashboard}
+            hasSavedSession={Boolean(savedSession?.cachedBriefing)}
           />
         )}
-        {screen === 'loading' && <LoadingScreen />}
+        {screen === 'loading' && (
+          <LoadingScreen
+            completed={agentProgress?.completed}
+            tools={agentProgress?.tools}
+            logs={agentProgress?.logs}
+            currentStep={agentProgress?.currentStep}
+            startedAt={agentProgress?.startedAt}
+          />
+        )}
         {screen === 'dashboard' && briefingData && (
           <DashboardScreen
             data={briefingData}
             contextMeta={contextMeta}
             lastBriefingAt={savedSession?.lastBriefingAt}
+            historyList={history}
             onRefreshToday={handleRefreshFromStorage}
             onEditHoldings={handleEditHoldings}
             onAddTicker={handleAddTicker}

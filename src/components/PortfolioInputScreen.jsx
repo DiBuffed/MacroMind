@@ -3,7 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 export default function PortfolioInputScreen({
   onSubmit,
   onSkip,
+  onCancel,
   initialTickers = '',
+  hasSavedSession = false,
 }) {
   const [tickers, setTickers] = useState(initialTickers)
   const [file, setFile] = useState(null)
@@ -39,7 +41,7 @@ export default function PortfolioInputScreen({
       <div className="mx-auto w-full max-w-xl px-4 sm:px-6">
         <div className="mb-8 text-center">
           <span className="mm-pill mb-4 inline-block bg-mm-primary/10 px-4 py-1.5 text-xs font-bold text-mm-primary">
-            30초면 연결 시작
+            에이전트에 맡길 종목
           </span>
           <h2 className="text-2xl font-extrabold tracking-tight text-mm-text sm:text-3xl">
             종목만 알려 주세요
@@ -64,12 +66,12 @@ export default function PortfolioInputScreen({
               id="mm-tickers"
               value={tickers}
               onChange={(e) => setTickers(e.target.value)}
-              rows={3}
-              placeholder="삼성전자, SK하이닉스, 현대차, NAVER, TSMC ..."
+              rows={4}
+              placeholder="예: 삼성전자 10주, 하이닉스 조금, 애플, 테슬라랑 엔비디아도 있어... 또는 증권사 화면을 복사해서 붙여넣으세요."
               className="font-data w-full resize-y rounded-xl border border-mm-border bg-mm-page px-4 py-3 text-sm leading-relaxed text-mm-text placeholder:text-mm-muted/50 focus:border-mm-primary focus:outline-none focus:ring-2 focus:ring-mm-primary/20"
             />
             <p className="mt-2 text-xs text-mm-muted">
-              쉼표·줄바꿈으로 구분 — 한국/미국/ETF 모두 가능
+              자연스러운 문장, 목록, 복사된 텍스트 등 어떤 형식이든 에이전트가 종목을 찾아냅니다.
             </p>
           </div>
 
@@ -133,20 +135,32 @@ export default function PortfolioInputScreen({
 
         {/* 버튼 */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-between">
-          <button
-            type="button"
-            onClick={onSkip}
-            className="text-sm font-medium text-mm-muted underline-offset-4 transition hover:text-mm-primary hover:underline"
-          >
-            종목 없이 거시 브리핑만
-          </button>
+          <div className="flex gap-4 items-center">
+            {hasSavedSession ? (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="text-sm font-medium text-mm-muted underline-offset-4 transition hover:text-mm-primary hover:underline"
+              >
+                취소하고 돌아가기
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="text-sm font-medium text-mm-muted underline-offset-4 transition hover:text-mm-primary hover:underline"
+              >
+                종목 없이 거시 브리핑만
+              </button>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => onSubmit({ tickers, file })}
             disabled={!hasAnything}
             className="mm-pill bg-mm-primary px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-mm-primary/20 transition hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            분석 시작 →
+            에이전트 실행 →
           </button>
         </div>
       </div>

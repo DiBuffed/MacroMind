@@ -7,7 +7,6 @@
 const PIPELINE = [
   { key: 'collect', label: '뉴스·시세 수집', icon: '📡', desc: '환율·금리·유가·실시간 뉴스' },
   { key: 'recognize', label: '포트폴리오 인식', icon: '🔍', desc: '종목 추출·매핑' },
-  { key: 'risk', label: '리스크 계산', icon: '⚡', desc: '거시 노출도 0~100%' },
   { key: 'pattern', label: '역사 패턴 매칭', icon: '📚', desc: '유사 국면·결과 비교' },
   { key: 'briefing', label: '맞춤 브리핑 생성', icon: '✍️', desc: '내 포트 기준 리포트' },
 ]

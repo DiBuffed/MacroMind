@@ -6,6 +6,16 @@ export const MOCK_BRIEFING_RESPONSE = {
     oil_wti: { value: '$71.3', change: '-1.2%', direction: 'down' },
   },
   portfolio_tickers: ['삼성전자', 'SK하이닉스', 'TSMC'],
+  portfolio_links: [
+    { source: 'currency', target: '삼성전자', reason: '수출 비중이 높아 달러 강세 시 매출 확대 효과', strength: 'high' },
+    { source: 'currency', target: 'SK하이닉스', reason: '글로벌 반도체 결제 대금 달러 기반, 환차익 발생', strength: 'medium' },
+    { source: 'trump_policy', target: '삼성전자', reason: '미국 내 반도체 공장 보조금 및 관세 정책 영향', strength: 'high' },
+    { source: 'trump_policy', target: 'SK하이닉스', reason: '대중국 반도체 장비 수출 규제 가능성', strength: 'medium' },
+    { source: 'trump_policy', target: 'TSMC', reason: '대만 지정학 리스크와 미국 내 파운드리 경쟁력', strength: 'high' },
+    { source: 'geopolitical', target: 'TSMC', reason: '대만해협 긴장 고조 시 파운드리 공급망 리스크', strength: 'high' },
+    { source: 'interest_rate', target: '삼성전자', reason: '금리 인상 시 미래 이익 할인율 상승 부담', strength: 'low' },
+    { source: 'oil', target: 'SK하이닉스', reason: '반도체 공정 내 에너지 비용 및 물류비 부담', strength: 'low' }
+  ],
   risk_matrix: {
     currency: { score: 78, label: '환율 (달러↑)', severity: 'high', why: '달러가 강세면 수출 비중이 높은 반도체 종목은 원화 환산 수익이 늘지만, 수입 원자재 비용 상승과 외국인 매도 압력이 겹쳐 주가에 부담을 줍니다.' },
     interest_rate: { score: 52, label: '금리 (금리↑)', severity: 'medium', why: '금리가 오르면 기업 차입 비용이 올라가고, 미래 이익을 할인하는 비율이 높아져 성장주 밸류에이션에 부담을 줍니다.' },
@@ -41,6 +51,7 @@ export const MOCK_BRIEFING_RESPONSE = {
   news_feed: [
     {
       headline: '달러인덱스 105 돌파, 원·달러 1,380원대 진입',
+      region: 'international',
       summary:
         '미국 달러가 주요 통화 대비 강세를 보이면서 달러인덱스가 105를 넘겼습니다. 원·달러 환율도 1,380원대로 올라섰는데, 이는 수출 기업의 원화 환산 매출에 영향을 줄 수 있습니다.',
       ripple_effect:
@@ -55,6 +66,7 @@ export const MOCK_BRIEFING_RESPONSE = {
     },
     {
       headline: '트럼프, 반도체 관세 검토 시사 — "미국 제조업 보호"',
+      region: 'international',
       summary:
         '트럼프 전 대통령이 반도체 수입에 대한 추가 관세를 검토하겠다고 밝혔습니다. 아직 확정은 아니지만, 글로벌 반도체 공급망에 긴장감이 돌고 있습니다.',
       ripple_effect:
@@ -69,6 +81,7 @@ export const MOCK_BRIEFING_RESPONSE = {
     },
     {
       headline: 'WTI 원유 $71대, OPEC+ 감산 유지 결정',
+      region: 'international',
       summary:
         'OPEC+가 기존 감산 기조를 유지하기로 하면서 유가가 $71대를 유지하고 있습니다. 급등은 아니지만, 하방도 제한되어 있는 상황입니다.',
       ripple_effect:
@@ -80,7 +93,30 @@ export const MOCK_BRIEFING_RESPONSE = {
       macro_factors: ['oil'],
     },
     {
+      headline: '코스피 2,600선 안착 시도, 외국인 순매수 전환',
+      region: 'domestic',
+      summary: '코스피 지수가 외국인의 매수세에 힘입어 2,600선 위에서 등락을 거듭하고 있습니다. 반도체와 자동차 대형주 위주로 매수세가 유입되는 모습입니다.',
+      ripple_effect: '국내 증시의 투자 심리가 회복되면서 원화 가치 안정에도 긍정적인 영향을 줄 수 있습니다.',
+      historical_echo: '',
+      affected_tickers: ['삼성전자', '현대차'],
+      impact_explanation: '삼성전자와 현대차는 코스피 비중이 높은 대표 종목으로, 지수 상승 시 동반 강세를 보이는 경향이 있습니다.',
+      severity: 'medium',
+      macro_factors: ['currency']
+    },
+    {
+      headline: '한국은행, 기준금리 동결 결정 — "물가 추이 주시"',
+      region: 'domestic',
+      summary: '한국은행 금융통화위원회가 현재의 기준금리를 유지하기로 결정했습니다. 인플레이션 둔화 속도를 더 지켜보겠다는 신중한 입장입니다.',
+      ripple_effect: '금리 동결로 기업들의 이자 부담 급증 우려는 덜었으나, 고금리 상황이 지속됨에 따라 내수 소비 위축 가능성은 여전합니다.',
+      historical_echo: '과거 2010년대 중반 금리 정체기에도 내수주와 성장주 사이의 수익률 차별화가 뚜렷하게 나타난 바 있습니다.',
+      affected_tickers: ['카카오', 'NAVER'],
+      impact_explanation: '금리에 민감한 IT 성장주들은 금리 동결 소식에 안도하는 경향이 있지만, 인하 시점이 늦춰질 경우 반등 탄력이 약해질 수 있습니다.',
+      severity: 'medium',
+      macro_factors: ['interest_rate']
+    },
+    {
       headline: '미 10년물 금리 4.82%, 금리 인하 기대 후퇴',
+      region: 'international',
       summary:
         '미국 국채 10년물 금리가 4.82%로 소폭 올랐습니다. 시장에서는 연준이 금리를 내릴 시기가 늦춰질 수 있다는 전망이 나오고 있습니다.',
       ripple_effect:

@@ -19,23 +19,21 @@ export default function AppHeader({ apiStatus, screen }) {
             Macro<span className="text-mm-primary">Mind</span>
           </span>
           {screen === 'dashboard' ? (
-            <span className="font-data hidden rounded-md bg-mm-primary/8 px-2 py-0.5 text-[10px] font-bold text-mm-primary sm:inline-block">
-              포트폴리오
+            <span className="font-data hidden rounded-md bg-mm-primary/10 px-3 py-1 text-[11px] font-bold text-mm-primary sm:inline-block">
+              에이전트 대시보드
             </span>
           ) : (
             <span className="hidden max-w-[15rem] truncate text-xs leading-snug text-mm-muted sm:inline-block">
-              뉴스 → 거시 → 내 종목
+              뉴스·거시 흐름을 내 종목과 연결하는 에이전트
             </span>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <a
-            href="/landing.html"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/"
             className="font-data hidden rounded-full px-3 py-1.5 text-[11px] font-medium text-mm-muted transition hover:bg-mm-alt hover:text-mm-text sm:inline-block"
           >
-            소개
+            랜딩
           </a>
           <span
             className={`font-data rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${

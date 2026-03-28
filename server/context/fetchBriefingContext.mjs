@@ -8,6 +8,16 @@ function safeJson(res) {
   return res.json()
 }
 
+function nowMs() {
+  return Date.now()
+}
+
+function normalizeToolStatus({ value }) {
+  if (value == null) return 'skip'
+  if (Array.isArray(value) && value.length === 0) return 'skip'
+  return 'ok'
+}
+
 function parseRssItems(xml) {
   const items = []
   const itemRegex = /<item>([\s\S]*?)<\/item>/g
@@ -178,33 +188,62 @@ async function fetchAlphaVantageWti() {
 /**
  * @returns {{ text: string, meta: { sources: string[], newsCount: number } }}
  */
-export async function fetchBriefingContext() {
+export async function fetchBriefingContext(emit) {
   const sources = []
   const blocks = []
+  const tools = []
 
-  const [fxResult, fredResult, wtiResult, googleRss, finnResult, newsApiResult] =
-    await Promise.allSettled([
-      fetchFrankfurterUsdKrw(),
-      fetchFredDgs10(),
-      fetchAlphaVantageWti(),
-      fetchGoogleNewsRss(),
-      fetchFinnhubMarketNews(),
-      fetchNewsApiHeadlines(),
-    ])
+  const tool = async (name, fn) => {
+    const startedAt = nowMs()
+    try {
+      const value = await fn()
+      const ms = nowMs() - startedAt
+      const status = normalizeToolStatus({ value })
+      const detail =
+        status === 'ok'
+          ? Array.isArray(value)
+            ? { count: value.length }
+            : {}
+          : { reason: 'not_configured_or_empty' }
+      const record = { name, status, ms, detail }
+      tools.push(record)
+      emit?.({ event: 'tool', data: record })
+      return value
+    } catch (err) {
+      const ms = nowMs() - startedAt
+      const record = {
+        name,
+        status: 'fail',
+        ms,
+        detail: {
+          message: err instanceof Error ? err.message : String(err),
+        },
+      }
+      tools.push(record)
+      emit?.({ event: 'tool', data: record })
+      return null
+    }
+  }
 
-  const fx = fxResult.status === 'fulfilled' ? fxResult.value : null
+  const [fx, fred, wti, gNews, finn, newsApi] = await Promise.all([
+    tool('frankfurter', fetchFrankfurterUsdKrw),
+    tool('fred', fetchFredDgs10),
+    tool('alphavantage', fetchAlphaVantageWti),
+    tool('google_news_rss', fetchGoogleNewsRss),
+    tool('finnhub_news', fetchFinnhubMarketNews),
+    tool('newsapi', fetchNewsApiHeadlines),
+  ])
+
   if (fx) {
     sources.push(fx.source)
     blocks.push(`[환율]\n${fx.line}`)
   }
 
-  const fred = fredResult.status === 'fulfilled' ? fredResult.value : null
   if (fred) {
     sources.push(fred.source)
     blocks.push(`[금리·채권]\n${fred.line}`)
   }
 
-  const wti = wtiResult.status === 'fulfilled' ? wtiResult.value : null
   if (wti) {
     sources.push(wti.source)
     blocks.push(`[유가]\n${wti.line}`)
@@ -212,16 +251,14 @@ export async function fetchBriefingContext() {
 
   const newsItems = []
 
-  const gNews = googleRss.status === 'fulfilled' ? googleRss.value : []
-  if (gNews.length) {
+  if (Array.isArray(gNews) && gNews.length) {
     sources.push('google_news_rss')
     for (const item of gNews) {
       newsItems.push(`· [${item.source}] ${item.title}`)
     }
   }
 
-  const finn = finnResult.status === 'fulfilled' ? finnResult.value : []
-  if (finn.length) {
+  if (Array.isArray(finn) && finn.length) {
     sources.push('finnhub_news')
     for (const item of finn) {
       const line = item.summary
@@ -231,8 +268,7 @@ export async function fetchBriefingContext() {
     }
   }
 
-  const newsApi = newsApiResult.status === 'fulfilled' ? newsApiResult.value : []
-  if (newsApi.length) {
+  if (Array.isArray(newsApi) && newsApi.length) {
     sources.push('newsapi')
     for (const item of newsApi) {
       newsItems.push(`· [${item.source}] ${item.title}`)
@@ -259,6 +295,7 @@ export async function fetchBriefingContext() {
     meta: {
       sources: [...new Set(sources)],
       newsCount: uniqueNews.length,
+      tools,
     },
   }
 }
